@@ -1,5 +1,5 @@
 import { useState } from "react";
-import * as api from "../../api";
+import * as api from "../api";
 
 // @mui
 import {
@@ -16,9 +16,9 @@ import {
 } from "@mui/material";
 
 // component
-import { HFTextInput, HFButton } from "../../components/hook-form";
-import Snackbar from "../../components/snackbar";
-import MainCard from "../../components/card/MainCard";
+import { HFTextInput, HFButton } from "../components/hook-form";
+import Snackbar from "../components/snackbar";
+import MainCard from "../components/card/MainCard";
 
 import IconButton from "@mui/material/IconButton";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";

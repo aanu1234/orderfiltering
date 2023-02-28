@@ -1,5 +1,4 @@
 import * as React from "react";
-import * as api from "../api";
 import PropTypes from "prop-types";
 import AppBar from "@mui/material/AppBar";
 import Grid from "@mui/material/Grid";
@@ -15,12 +14,13 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import InputAdornment from "@mui/material/InputAdornment";
 import Drawer from "@mui/material/Drawer";
-import SearchForm from "../pages/modal/SearchForm";
 import { styled } from "@mui/material";
 import { HFTextInput } from "./hook-form";
-import OrderReducer, { initalState } from "../reducers";
-import { FETCH_ALL } from "../reducers/constants";
 import Backdrop from "./backdrop";
+
+import FilterPanel from "../pages/FilterPanel";
+import { useDispatch, useSelector } from "react-redux";
+import { searchOrders } from "../reducers/actions";
 
 const lightColor = "rgba(255, 255, 255, 0.7)";
 
@@ -28,7 +28,8 @@ function Header(props) {
   const { open, toggleDrawer, onDrawerToggle } = props;
   const [searchItem, setSearchItem] = React.useState("");
   const [loading, setLoading] = React.useState(false);
-  const [state, dispatch] = React.useReducer(OrderReducer, initalState);
+  const { totalProducts } = useSelector((state) => state.orders);
+  const dispatch = useDispatch();
 
   const StyledBox = styled(Box)(({ theme }) => ({
     height: "100%",
@@ -43,20 +44,20 @@ function Header(props) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const arrItem = [];
+    const arrItems = [];
+    const searchItems = searchItem.split(",");
+    if (searchItems.length > 0) {
+      searchItems.forEach((item) => arrItems.push(item.trim()));
+    }
     try {
       setLoading(true);
-      if (searchItem.length > 0) {
-        arrItem.push(searchItem);
-        // console.log({ item: arrItem });
-        const { data } = await api.postOrders({ item: arrItem });
-        dispatch({ type: FETCH_ALL, payload: data });
-      }
+      dispatch(searchOrders({ item: arrItems }));
     } catch (error) {
       console.log(error.message);
     }
     setLoading(false);
   };
+
   if (loading) return <Backdrop loading />;
 
   return (
@@ -91,9 +92,7 @@ function Header(props) {
               <Typography color="inherit" variant="h5">
                 Item search
               </Typography>
-              <Typography variant="caption">
-                {state.totalProducts} items
-              </Typography>
+              <Typography variant="caption">{totalProducts} items</Typography>
             </Grid>
             <Grid item>
               <Box component="form" onSubmit={handleSubmit}>
@@ -139,7 +138,7 @@ function Header(props) {
       </AppBar>
       <Drawer anchor="right" open={open} onClose={toggleDrawer}>
         <StyledBox>
-          <SearchForm />
+          <FilterPanel />
         </StyledBox>
       </Drawer>
     </React.Fragment>

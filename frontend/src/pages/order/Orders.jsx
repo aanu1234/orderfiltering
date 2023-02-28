@@ -1,6 +1,7 @@
 import "./orders.css";
 // import * as api from "../../api";
-import { useState, useReducer } from "react";
+import { useState } from "react";
+import { useSelector } from "react-redux";
 
 // components
 // import Backdrop from "../../components/backdrop";
@@ -8,7 +9,6 @@ import OrderTable from "../../components/table/OrderTable";
 import Pagination from "../../components/pagination/Pagination";
 
 // reducers
-import OrderReducer, { initalState } from "../../reducers";
 // import { FETCH_ALL } from "../../reducers/constants";
 import Content from "../../components/Content";
 
@@ -17,7 +17,7 @@ import Content from "../../components/Content";
 const Orders = ({ toggleDrawer }) => {
   // const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [state] = useReducer(OrderReducer, initalState);
+  const { products, totalProducts } = useSelector((state) => state.orders);
 
   // const fetchData = async () => {
   //   setLoading(true);
@@ -33,10 +33,6 @@ const Orders = ({ toggleDrawer }) => {
   // useEffect(() => {
   //   fetchData();
   // }, []);
-
-  const { products, totalProducts } = state;
-
-  console.log(products);
 
   const indexOfLastProducts = currentPage * 20;
   const indexOfFirstProducts = indexOfLastProducts - 20;
