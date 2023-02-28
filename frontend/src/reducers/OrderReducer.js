@@ -1,4 +1,4 @@
-import { FETCH_ALL, FILTER_ITEM } from "./constants";
+import { FETCH_ALL, FILTER_ITEM, RESET_ALL } from "./constants";
 
 export const initalState = {
   orders: [],
@@ -16,6 +16,9 @@ const OrderReducer = (state = initalState, action) => {
         products: action.payload.data,
         totalProducts: action.payload.total,
       };
+    }
+    case RESET_ALL: {
+      return initalState;
     }
     case FILTER_ITEM: {
       const searchItems = state.orders.filter((data) =>

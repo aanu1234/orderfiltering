@@ -1,7 +1,7 @@
 import * as api from "../api";
 import { FETCH_ALL } from "./constants";
 
-export const fetchOrders = () => async (dispatch) => {
+export const fetchAllOrders = () => async (dispatch) => {
   try {
     const { data } = await api.getOrders();
     dispatch({ type: FETCH_ALL, payload: data });

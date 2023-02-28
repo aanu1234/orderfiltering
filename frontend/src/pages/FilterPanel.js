@@ -1,5 +1,5 @@
 import { useState } from "react";
-import * as api from "../api";
+import { useDispatch } from "react-redux";
 
 // @mui
 import {
@@ -7,6 +7,7 @@ import {
   Collapse,
   Box,
   Divider,
+  IconButton,
   Stack,
   styled,
   Typography,
@@ -15,13 +16,16 @@ import {
   Checkbox,
 } from "@mui/material";
 
-// component
+// components
 import { HFTextInput, HFButton } from "../components/hook-form";
 import Snackbar from "../components/snackbar";
 import MainCard from "../components/card/MainCard";
 
-import IconButton from "@mui/material/IconButton";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+
+// reducers
+import { searchOrders } from "../reducers/actions";
+import { RESET_ALL } from "../reducers/constants";
 
 const ExpandMore = styled((props) => {
   const { expand, ...other } = props;
@@ -34,10 +38,20 @@ const ExpandMore = styled((props) => {
   }),
 }));
 
+const defaultValues = { order: "", item: "", type: "" };
+
 const SearchForm = () => {
   const [expandedOrder, setExpandedOrder] = useState(false);
   const [expandedItem, setExpandedItem] = useState(false);
   const [expandedType, setExpandedType] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [message, setMessage] = useState("");
+  const [formdata, setFormdata] = useState(defaultValues);
+  const { item, order, type } = formdata;
+  const dispatch = useDispatch();
 
   const handleExpandTypeClick = () => {
     setExpandedType(!expandedType);
@@ -47,32 +61,6 @@ const SearchForm = () => {
   };
   const handleExpandOrderClick = () => {
     setExpandedOrder(!expandedOrder);
-  };
-
-  const defaultValues = {
-    order: "",
-    item: "",
-    type: "",
-  };
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [message, setMessage] = useState("");
-  const [formdata, setFormdata] = useState(defaultValues);
-  const { item, order, type } = formdata;
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      // console.log(formdata);
-      const { data } = api.getOrders(formdata);
-      if (data?.status !== "success") throw new Error("Something went wrong");
-      // set new data
-      setSuccess(true);
-      setMessage("Please wait...");
-    } catch (error) {
-      setMessage(error.message);
-    }
   };
 
   const handleChange = (e) => {
@@ -94,13 +82,40 @@ const SearchForm = () => {
     }));
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      dispatch(searchOrders(formdata));
+      setSuccess(true);
+    } catch (error) {
+      setMessage(error.message);
+    }
+    setLoading(false);
+  };
+
+  const handleResetAll = () => {
+    dispatch({ type: RESET_ALL });
+  };
+
   return (
     <MainCard
       title="Set Parameters"
       subheader="9 parameters available"
+      secondary={
+        <Typography
+          sx={{ cursor: "pointer" }}
+          variant="caption"
+          onClick={handleResetAll}
+        >
+          Reset all
+        </Typography>
+      }
       sx={{ overflow: "auto", height: "100%", maxHeight: 700 }}
     >
-      {error && <Snackbar open={error} severity="error" message={message} />}
+      {error && (
+        <Snackbar open={error} severity="error" message={errorMessage} />
+      )}
       {success && (
         <Snackbar open={success} severity="success" message={message} />
       )}
@@ -171,7 +186,7 @@ const SearchForm = () => {
         <Divider />
         <CardActions>
           <HFButton type="submit" text="Cancel" />
-          <HFButton type="submit" text="Apply" />
+          <HFButton type="submit" text="Apply" disabled={loading} />
         </CardActions>
       </Box>
     </MainCard>
